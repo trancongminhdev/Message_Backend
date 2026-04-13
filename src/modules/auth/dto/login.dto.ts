@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
 
-export class  CreateNewUserRequest {
-  @ApiProperty({ required: true, default: 'Trần Công Minh' })
-  @IsString()
-  userName: string;
-
+export class LoginRequest {
   @ApiProperty({ required: true, default: 'tranminh209204@gmail.com' })
   @IsEmail()
   email: string;
