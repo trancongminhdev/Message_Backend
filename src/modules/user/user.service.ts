@@ -58,7 +58,13 @@ export class UserService {
 
     const [users, total] = await Promise.all([
       await this.prisma.user.findMany({
-        where: { userName, status: true },
+        where: {
+          userName: {
+            startsWith: userName,
+            mode: 'insensitive',
+          },
+          status: true,
+        },
         skip,
         take: opPageSize,
         orderBy: { createAt: 'desc' },
