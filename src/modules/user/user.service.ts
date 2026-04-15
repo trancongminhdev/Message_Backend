@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateNewUserRequest } from './dto/create-new-user.dto';
 import { GetListUser } from './dto/get-list-user.dto';
-import { IResponseListData } from 'types/interface/api.interface';
+import { IResponse, IResponseListData } from 'types/interface/api.interface';
 import { User } from '@prisma/client';
 import { HTTP_RESPONSE } from 'types/constant/api.constant';
 
@@ -51,10 +51,10 @@ export class UserService {
   }
 
   async getListUser(data: GetListUser): Promise<IResponseListData<User>> {
-    const { userName, page, pageSize } = data;
-    const opPage = page || 1;
-    const opPageSize = pageSize || 20;
-    const skip = (page || 0 - 1) * pageSize || 0;
+    const { userName } = data;
+    const page = data.page || 1;
+    const pageSize = data.pageSize || 20;
+    const skip = (page - 1) * pageSize;
 
     const [users, total] = await Promise.all([
       await this.prisma.user.findMany({
@@ -66,7 +66,7 @@ export class UserService {
           status: true,
         },
         skip,
-        take: opPageSize,
+        take: pageSize,
         orderBy: { createAt: 'desc' },
       }),
 
@@ -80,13 +80,23 @@ export class UserService {
     return HTTP_RESPONSE.OK({
       items: users,
       pagination: {
-        page: opPage,
-        pageSize: opPageSize,
+        page,
+        pageSize,
         total: total,
         totalPage,
         nextPage,
         previousPage,
       },
     });
+  }
+
+  async getUserById(id: string): Promise<IResponse<User | null>> {
+    if (typeof Number(id) !== 'number') {
+      throw new ConflictException('Type ID is Number');
+    }
+
+    return HTTP_RESPONSE.OK(
+      await this.prisma.user.findUnique({ where: { id: Number(id) } }),
+    );
   }
 }

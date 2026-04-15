@@ -31,24 +31,23 @@ model User {
   updateAt   DateTime @default(now())
 }
 
-model Room {
-  id       Int      @id @default(autoincrement())
-  members  String[]
-  status   Boolean
-  // messages Message[]
-  createAt DateTime @default(now())
-  updateAt DateTime @default(now())
+model Conversation {
+  id       Int       @id @default(autoincrement())
+  members  Int[]
+  status   Boolean   @default(true)
+  messages Message[]
+  createAt DateTime  @default(now())
+  updateAt DateTime  @default(now())
 }
 
 model Message {
-  id       Int            @id @default(autoincrement())
-  idRoom   Int
-  // userSend     Int
-  // userReceiver Int
-  message  String
-  status   STATUS_MESSAGE @default(SENT)
-  createAt DateTime       @default(now())
-  updateAt DateTime       @default(now())
+  id             Int            @id @default(autoincrement())
+  idConversation Int
+  userSend       Int
+  message        String
+  status         STATUS_MESSAGE @default(SENT)
+  createAt       DateTime       @default(now())
+  updateAt       DateTime       @default(now())
 
-  // room Room @relation(fields: [idRoom], references: [id])
+  conversation Conversation @relation(fields: [idConversation], references: [id])
 }
