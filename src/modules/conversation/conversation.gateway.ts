@@ -41,12 +41,17 @@ export class ConversationGateway
     @MessageBody() message: SendMessageRequest,
     @ConnectedSocket() client: Socket,
   ) {
-    
-    console.log();
-    
     const accessToken = client.handshake.auth.token;
 
     const newMessage = await this.messageService.create(accessToken, message);
     return newMessage;
+  }
+
+  @SubscribeMessage(SUBCRIBE_MESSAGE.JOIN_CONVERSATION)
+  async joinConversation(
+    @MessageBody() roomId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(roomId);
   }
 }

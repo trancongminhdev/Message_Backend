@@ -47,7 +47,7 @@ export class MessageService {
     ]);
 
     if (conversationExists) {
-      //Chưa tồn tại conversation
+      //Tồn tại conversation
       const payloadMessage = {
         idConversation: conversationExists.id,
         userSend: idUser,
@@ -67,7 +67,7 @@ export class MessageService {
 
       return HTTP_RESPONSE.OK(newMessage);
     } else {
-      //Tồn tại conversation
+      //Chưa tồn tại conversation
       const conversation =
         await this.conversationService.create(payloadConversation);
 
@@ -82,9 +82,9 @@ export class MessageService {
       });
 
       const payload = {
-        senderId: idReceiver,
+        senderId: idUser,
         receiverId: idReceiver,
-        conversation: conversationExists,
+        conversation: conversation,
         message: newMessage,
       };
 
@@ -109,7 +109,7 @@ export class MessageService {
       throw new ConflictException('ID Receiver is Number');
 
     const conversation = await this.conversationService.findConversation([
-      idUser,
+      Number(idUser),
       Number(idReceiver),
     ]);
 

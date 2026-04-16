@@ -6,6 +6,7 @@ import { IUserJWT } from 'types/interface/user.interface';
 import { FilterOptions } from 'types/filterOption.dto';
 import { HTTP_RESPONSE } from 'types/constant/api.constant';
 import { MessageService } from '../message/message.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ConversationService {
@@ -13,6 +14,8 @@ export class ConversationService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
   ) {}
 
   async create(data: CreateNewConversationRequest): Promise<Conversation> {
@@ -64,20 +67,27 @@ export class ConversationService {
       }),
     ]);
 
-    const messageLastConversation = await Promise.all(
-      items.map( async (item) => {
-        await this.messageService.findLastMessageByIdConversation(item.id);
+    const userAndConversations = await Promise.all(
+      items.flatMap(async (item) => {
+        const idReceiver = item.members.filter((member) => member != idUser);
+        const user = await this.userService.findById(idReceiver[0]);
+        const message =
+          await this.messageService.findLastMessageByIdConversation(item.id);
+
+        return {
+          ...item,
+          user,
+          message,
+        };
       }),
     );
 
-    // console.log(messageLastConversation);
-    
     const totalPage = Math.ceil(total / pageSize);
     const nextPage = page < totalPage;
     const previousPage = page > 1;
 
     return HTTP_RESPONSE.OK({
-      items: items,
+      items: userAndConversations,
       pagination: {
         page,
         pageSize,
