@@ -34,7 +34,7 @@ export class ConversationService {
     return await this.prisma.conversation.findFirst({
       where: {
         members: {
-          equals: sortedMembers,
+          hasEvery: sortedMembers,
         },
       },
     });

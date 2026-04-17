@@ -33,7 +33,7 @@ export class MessageService {
   ): Promise<IResponse<Message | null>> {
     const { id: idUser } = await this.jwtService.verify(accessToken);
     const { idReceiver, message } = data;
-    
+
     if (!idReceiver && !message)
       throw new ConflictException('idReceiver, message is required');
 
@@ -96,7 +96,7 @@ export class MessageService {
 
   async getListMessages(
     user: IUserJWT,
-    idReceiver: string,
+    idConversation: string,
     query: FilterOptions,
   ): Promise<IResponseListData<Message>> {
     const { idUser } = user;
@@ -105,25 +105,24 @@ export class MessageService {
     const pageSize = query.pageSize || 20;
     const skip = (page - 1) * pageSize;
 
-    if (isNaN(Number(idReceiver)))
+    if (isNaN(Number(idConversation)))
       throw new ConflictException('ID Receiver is Number');
 
-    const conversation = await this.conversationService.findConversation([
-      Number(idUser),
-      Number(idReceiver),
-    ]);
+    const conversation = await this.conversationService.findById(
+      Number(idConversation),
+    );
 
     if (!conversation) throw new NotFoundException('Conversation is not found');
 
     const [items, total] = await Promise.all([
       await this.prisma.message.findMany({
-        where: { idConversation: conversation.id },
+        where: { idConversation: Number(idConversation) },
         skip,
         take: pageSize,
-        orderBy: { createAt: 'desc' },
+        orderBy: { createAt: 'asc' },
       }),
       this.prisma.message.count({
-        where: { idConversation: conversation.id },
+        where: { idConversation: Number(idConversation) },
       }),
     ]);
 

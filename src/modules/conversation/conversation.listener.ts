@@ -12,12 +12,13 @@ export class ConversationListener {
   @OnEvent(EVENTS.SEND_MESSAGE)
   sendMessage(payload: { conversation: Conversation; message: Message }) {
     const { conversation, message } = payload;
+    
     this.conversationGateway.server
       .to(conversation.id.toString())
-      .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_CONTAINER, message);
-    this.conversationGateway.server
-      .to(conversation.id.toString())
-      .emit(SUBCRIBE_MESSAGE.JOIN_CONVERSATION, conversation);
+      .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_CONVERSATION, message);
+    // this.conversationGateway.server
+    //   .to(conversation.id.toString())
+    //   .emit(SUBCRIBE_MESSAGE.JOIN_CONVERSATION, conversation);
   }
 
   @OnEvent(EVENTS.SEND_MESSAGE_FRIST)

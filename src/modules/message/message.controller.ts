@@ -30,10 +30,10 @@ export class MessageController {
   @Get('get-list-messages/:id')
   async getListMessages(
     @Req() req,
-    @Param('id') idreceiver: string,
+    @Param('id') idConversation: string,
     @Query() query: FilterOptions,
   ) {
     const user = req.user;
-    return this.messageService.getListMessages(user, idreceiver, query);
+    return this.messageService.getListMessages(user, idConversation, query);
   }
 }
