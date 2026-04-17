@@ -3,16 +3,18 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { MessageService } from './message.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateNewMessageRequest } from './dto/create-new-message.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FilterOptions } from 'types/filterOption.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateNewMessageRequest } from './dto/create-new-message.dto';
+import { UpdateStatusMessageRequest } from './dto/update-status-message.dto';
+import { MessageService } from './message.service';
 
 @ApiTags('Message')
 @Controller('message')
@@ -29,11 +31,14 @@ export class MessageController {
 
   @Get('get-list-messages/:id')
   async getListMessages(
-    @Req() req,
     @Param('id') idConversation: string,
     @Query() query: FilterOptions,
   ) {
-    const user = req.user;
-    return this.messageService.getListMessages(user, idConversation, query);
+    return this.messageService.getListMessages(idConversation, query);
+  }
+
+  @Patch('update-status-message/:id')
+  async updateSatusMessage(@Param('id') idMessage: string, @Body() body:UpdateStatusMessageRequest) {
+    return this.messageService.updateStatusMessage(idMessage, body);
   }
 }

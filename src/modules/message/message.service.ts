@@ -16,6 +16,7 @@ import { IResponse, IResponseListData } from 'types/interface/api.interface';
 import { IUserJWT } from 'types/interface/user.interface';
 import { ConversationService } from '../conversation/conversation.service';
 import { CreateNewMessageRequest } from './dto/create-new-message.dto';
+import { UpdateStatusMessageRequest } from './dto/update-status-message.dto';
 
 @Injectable()
 export class MessageService {
@@ -95,12 +96,9 @@ export class MessageService {
   }
 
   async getListMessages(
-    user: IUserJWT,
     idConversation: string,
     query: FilterOptions,
   ): Promise<IResponseListData<Message>> {
-    const { idUser } = user;
-
     const page = query.page || 1;
     const pageSize = query.pageSize || 20;
     const skip = (page - 1) * pageSize;
@@ -149,6 +147,18 @@ export class MessageService {
       orderBy: {
         createAt: 'desc',
       },
+    });
+  }
+
+  async updateStatusMessage(
+    idMessage: string,
+    data: UpdateStatusMessageRequest,
+  ) {
+    console.log(idMessage, data);
+    
+    return await this.prisma.message.update({
+      data: data,
+      where: { id: Number(idMessage) },
     });
   }
 }
