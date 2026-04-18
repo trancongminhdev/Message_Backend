@@ -154,8 +154,6 @@ export class MessageService {
     idMessage: string,
     data: UpdateStatusMessageRequest,
   ) {
-    console.log(idMessage, data);
-    
     return await this.prisma.message.update({
       data: data,
       where: { id: Number(idMessage) },

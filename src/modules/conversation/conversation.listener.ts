@@ -23,25 +23,25 @@ export class ConversationListener {
 
   @OnEvent(EVENTS.SEND_MESSAGE_FRIST)
   sendMessageFrist(payload: {
-    senderId;
-    receiverId;
+    senderId: number;
+    receiverId:number;
     conversation: Conversation;
     message: Message;
   }) {
     const { receiverId, senderId, conversation, message } = payload;
 
     this.conversationGateway.server
-      .to(senderId)
+      .to(senderId.toString())
       .emit(SUBCRIBE_MESSAGE.RETRY_CONVERSATION, conversation);
     this.conversationGateway.server
-      .to(receiverId)
+      .to(receiverId.toString())
       .emit(SUBCRIBE_MESSAGE.RETRY_CONVERSATION, conversation);
     
     this.conversationGateway.server
-      .to(senderId)
+      .to(senderId.toString())
       .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_USER, message);
     this.conversationGateway.server
-      .to(receiverId)
+      .to(receiverId.toString())
       .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_USER, message);
   }
 }

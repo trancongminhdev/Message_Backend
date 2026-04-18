@@ -12,6 +12,9 @@ import { Server, Socket } from 'socket.io';
 import { SUBCRIBE_MESSAGE } from 'types/constant/message.constant';
 import { MessageService } from '../message/message.service';
 import { SendMessageRequest } from './dto/send-message.dto';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 @WebSocketGateway({
@@ -22,16 +25,25 @@ import { SendMessageRequest } from './dto/send-message.dto';
 export class ConversationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly messageService: MessageService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
-  handleConnection(client: Socket) {
-    console.log('Client connected:', client.id);
+  async handleConnection(client: Socket) {
+    const accessToken = client.handshake.auth.token;
+    const user: User = await this.jwtService.verify(accessToken);
+    await this.userService.updateIsOnlineUser(user.id, true);
   }
 
-  handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client.id);
+  async handleDisconnect(client: Socket) {
+    const accessToken = client.handshake.auth.token;
+    const user: User = await this.jwtService.verify(accessToken);
+
+    await this.userService.updateIsOnlineUser(user.id, false);
   }
 
   @SubscribeMessage(SUBCRIBE_MESSAGE.SEND_MESSAGE)

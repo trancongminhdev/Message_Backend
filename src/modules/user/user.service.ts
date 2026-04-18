@@ -1,27 +1,15 @@
-import {
-  ConflictException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'prisma/prisma.service';
 import { HTTP_RESPONSE } from 'types/constant/api.constant';
 import { IResponse, IResponseListData } from 'types/interface/api.interface';
-import { IUserJWT } from 'types/interface/user.interface';
-import { ConversationService } from '../conversation/conversation.service';
 import { CreateNewUserRequest } from './dto/create-new-user.dto';
-import { GetListUserConversationRequest } from '../conversation/dto/get-list-user-conversation.dto';
 import { GetListUser } from './dto/get-list-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly prisma: PrismaService,
-    @Inject(forwardRef(() => ConversationService))
-    private readonly conversationService: ConversationService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createNewUser(data: CreateNewUserRequest) {
     const { userName, email, password } = data;
@@ -54,7 +42,10 @@ export class UserService {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
-  async findUserByIdAndUserName(idUser: number, userName: string):Promise<User | null> {
+  async findUserByIdAndUserName(
+    idUser: number,
+    userName: string,
+  ): Promise<User | null> {
     return await this.prisma.user.findFirst({
       where: {
         id: idUser,
@@ -62,7 +53,7 @@ export class UserService {
           startsWith: userName,
           mode: 'insensitive',
         },
-        status: true
+        status: true,
       },
     });
   }
@@ -119,5 +110,12 @@ export class UserService {
     return HTTP_RESPONSE.OK(
       await this.prisma.user.findUnique({ where: { id: Number(id) } }),
     );
+  }
+
+  async updateIsOnlineUser(id: number, isOnline: boolean) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: { isOnline },
+    });
   }
 }
