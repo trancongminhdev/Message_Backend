@@ -1,19 +1,17 @@
+import { Injectable } from '@nestjs/common';
 import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
   ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Message } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { SUBCRIBE_MESSAGE } from 'types/constant/message.constant';
-import { SendMessageRequest } from './dto/send-message.dto';
 import { MessageService } from '../message/message.service';
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { SendMessageRequest } from './dto/send-message.dto';
 
 @Injectable()
 @WebSocketGateway({

@@ -1,18 +1,26 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'prisma/prisma.service';
-import { CreateNewUserRequest } from './dto/create-new-user.dto';
-import { GetListUser } from './dto/get-list-user.dto';
-import { IResponse, IResponseListData } from 'types/interface/api.interface';
-import { User } from '@prisma/client';
 import { HTTP_RESPONSE } from 'types/constant/api.constant';
+import { IResponse, IResponseListData } from 'types/interface/api.interface';
+import { IUserJWT } from 'types/interface/user.interface';
+import { ConversationService } from '../conversation/conversation.service';
+import { CreateNewUserRequest } from './dto/create-new-user.dto';
+import { GetListUserConversationRequest } from '../conversation/dto/get-list-user-conversation.dto';
+import { GetListUser } from './dto/get-list-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => ConversationService))
+    private readonly conversationService: ConversationService,
   ) {}
 
   async createNewUser(data: CreateNewUserRequest) {
@@ -44,6 +52,19 @@ export class UserService {
 
   async findById(id: number) {
     return await this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async findUserByIdAndUserName(idUser: number, userName: string):Promise<User | null> {
+    return await this.prisma.user.findFirst({
+      where: {
+        id: idUser,
+        userName: {
+          startsWith: userName,
+          mode: 'insensitive',
+        },
+        status: true
+      },
+    });
   }
 
   async findByEmail(email: string) {

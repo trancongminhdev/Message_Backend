@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { JwtStrategy } from './jwt.strategy';
+import { ConversationModule } from '../conversation/conversation.module';
 
 @Module({
   imports: [
@@ -15,11 +16,12 @@ import { JwtStrategy } from './jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
+        signOptions: { expiresIn: '3d' },
       }),
     }),
     UserModule,
     ConfigModule,
+    ConversationModule
   ],
   controllers: [AuthController],
   providers: [AuthService, ConfigService, UserService, JwtStrategy],

@@ -1,9 +1,18 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { FilterOptions } from 'types/filterOption.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { CreateNewConversationRequest } from './dto/create-new-conversation.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { FilterOptions } from 'types/filterOption.dto';
+import { GetListUserConversationRequest } from './dto/get-list-user-conversation.dto';
 
 @Controller('conversation')
 @ApiBearerAuth('access-token')
@@ -17,8 +26,17 @@ export class ConversationController {
   }
 
   @Get('get-list-conversation')
-  async getListConversation(@Req() req, @Query() query:FilterOptions) {
+  async getListConversation(@Req() req, @Query() query: FilterOptions) {
     const user = req.user;
-    return this.conversationService.getListConversation(user, query)
+    return this.conversationService.getListConversation(user, query);
+  }
+
+  @Get('get-list-user-conversation')
+  async getListUserConversation(
+    @Req() req,
+    @Query() query: GetListUserConversationRequest,
+  ) {
+    const user = req.user;
+    return this.conversationService.getListUserConversation(user, query);
   }
 }
