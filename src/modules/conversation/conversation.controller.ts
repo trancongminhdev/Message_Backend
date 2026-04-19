@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { CreateNewConversationRequest } from './dto/create-new-conversation.dto';
 import { GetListUserConversationRequest } from './dto/get-list-user-conversation.dto';
+import { CheckConversationRequest } from './dto/check-conversation.dto';
 
 @Controller('conversation')
 @ApiBearerAuth('access-token')
@@ -38,5 +39,14 @@ export class ConversationController {
   ) {
     const user = req.user;
     return this.conversationService.getListUserConversation(user, query);
+  }
+
+  @Post('check-conversation')
+  async checkConversation(
+    @Req() req,
+    @Body() body: CheckConversationRequest,
+  ) {
+    const user = req.user;
+    return this.conversationService.checkConversation(user, body);
   }
 }

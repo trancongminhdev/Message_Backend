@@ -1,14 +1,21 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Conversation, Message, User } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { HTTP_RESPONSE } from 'types/constant/api.constant';
 import { FilterOptions } from 'types/filterOption.dto';
-import { IResponseListData } from 'types/interface/api.interface';
+import { IResponse, IResponseListData } from 'types/interface/api.interface';
 import { IUserJWT } from 'types/interface/user.interface';
 import { MessageService } from '../message/message.service';
 import { UserService } from '../user/user.service';
 import { CreateNewConversationRequest } from './dto/create-new-conversation.dto';
 import { GetListUserConversationRequest } from './dto/get-list-user-conversation.dto';
+import { CheckConversationRequest } from './dto/check-conversation.dto';
 
 export interface IUserConversationLastMessage extends Conversation {
   user: User;
@@ -179,5 +186,26 @@ export class ConversationService {
         previousPage,
       },
     });
+  }
+
+  async checkConversation(
+    user: IUserJWT,
+    body: CheckConversationRequest,
+  ): Promise<IResponse<Conversation | null>> {
+    const { idUser } = user;
+    const { idConversation } = body;
+
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: idConversation,
+        members: {
+          hasEvery: [idUser],
+        },
+      },
+    });
+
+    if (!conversation) throw new ForbiddenException('Conversation is not found');
+
+    return HTTP_RESPONSE.OK(conversation);
   }
 }
