@@ -4,6 +4,7 @@ import { Conversation, Message } from '@prisma/client';
 import { EVENTS } from 'types/constant/event.constant';
 import { SUBCRIBE_MESSAGE } from 'types/constant/message.constant';
 import { ConversationGateway } from './conversation.gateway';
+import { IUserConversationLastMessage } from './conversation.service';
 
 @Injectable()
 export class ConversationListener {
@@ -21,26 +22,28 @@ export class ConversationListener {
   }
 
   @OnEvent(EVENTS.SEND_MESSAGE_FRIST)
-  sendMessageFrist(payload: {
-    senderId: number;
-    receiverId:number;
-    conversation: Conversation;
-    message: Message;
-  }) {
-    const { receiverId, senderId, conversation, message } = payload;
+  sendMessageFrist(
+    idReceiver: number,
+    conversation: IUserConversationLastMessage,
+  ) {
+    const { user, message } = conversation;
+    // console.log('idReceiver', idReceiver);
+    // console.log('conversation', conversation);
 
+    //Update conversation
     this.conversationGateway.server
-      .to(senderId.toString())
-      .emit(SUBCRIBE_MESSAGE.RETRY_CONVERSATION, conversation);
+      .to(user.id.toString())
+      .emit(SUBCRIBE_MESSAGE.ADD_NEW_CONVERSATION, conversation);
     this.conversationGateway.server
-      .to(receiverId.toString())
-      .emit(SUBCRIBE_MESSAGE.RETRY_CONVERSATION, conversation);
-    
+      .to(idReceiver.toString())
+      .emit(SUBCRIBE_MESSAGE.ADD_NEW_CONVERSATION, conversation);
+
+    // Gửi message
     this.conversationGateway.server
-      .to(senderId.toString())
+      .to(user.id.toString())
       .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_USER, message);
     this.conversationGateway.server
-      .to(receiverId.toString())
+      .to(idReceiver.toString())
       .emit(SUBCRIBE_MESSAGE.RECEIVE_MESSAGE_USER, message);
   }
 }

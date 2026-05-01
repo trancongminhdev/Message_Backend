@@ -13,8 +13,8 @@ import { HTTP_RESPONSE } from 'types/constant/api.constant';
 import { EVENTS } from 'types/constant/event.constant';
 import { FilterOptions } from 'types/filterOption.dto';
 import { IResponse, IResponseListData } from 'types/interface/api.interface';
-import { IUserJWT } from 'types/interface/user.interface';
-import { ConversationService } from '../conversation/conversation.service';
+import { ConversationService, IUserConversationLastMessage } from '../conversation/conversation.service';
+import { UserService } from '../user/user.service';
 import { CreateNewMessageRequest } from './dto/create-new-message.dto';
 import { UpdateStatusMessageRequest } from './dto/update-status-message.dto';
 
@@ -26,6 +26,7 @@ export class MessageService {
     private readonly conversationService: ConversationService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {}
 
   async create(
@@ -35,6 +36,9 @@ export class MessageService {
     const { id: idUser } = await this.jwtService.verify(accessToken);
     const { idReceiver, message } = data;
 
+    const user = await this.userService.findById(idUser);
+    if (!user) throw new NotFoundException('User is not found');
+
     if (!idReceiver && !message)
       throw new ConflictException('idReceiver, message is required');
 
@@ -42,15 +46,15 @@ export class MessageService {
       members: [idUser, idReceiver],
     };
 
-    const conversationExists = await this.conversationService.findConversation([
+    const conversation = await this.conversationService.findConversation([
       idUser,
       idReceiver,
     ]);
 
-    if (conversationExists) {
+    if (conversation) {
       //Tồn tại conversation
       const payloadMessage = {
-        idConversation: conversationExists.id,
+        idConversation: conversation.id,
         userSend: idUser,
         message: message,
       };
@@ -59,12 +63,13 @@ export class MessageService {
         data: payloadMessage,
       });
 
-      const payload = {
-        conversation: conversationExists,
+      const conversationLastMessage:IUserConversationLastMessage = {
+        ...conversation,
+        user: user,
         message: newMessage,
       };
 
-      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE, payload);
+      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE, idReceiver, conversationLastMessage);
 
       return HTTP_RESPONSE.OK(newMessage);
     } else {
@@ -82,14 +87,13 @@ export class MessageService {
         data: payloadMessage,
       });
 
-      const payload = {
-        senderId: idUser,
-        receiverId: idReceiver,
-        conversation: conversation,
+      const conversationLastMessage:IUserConversationLastMessage = {
+        ...conversation,
+        user: user,
         message: newMessage,
       };
 
-      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE_FRIST, payload);
+      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE_FRIST, idReceiver, conversationLastMessage);
 
       return HTTP_RESPONSE.OK(newMessage);
     }

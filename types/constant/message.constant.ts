@@ -6,5 +6,6 @@ export const SUBCRIBE_MESSAGE = {
   RECEIVE_MESSAGE_CONVERSATION: 'receive_message_conversation',
   ERROR: 'error',
   JOIN_CONVERSATION: 'join_conversation',
-  RETRY_CONVERSATION: "retry_conversation",
+  UPDATE_CONVERSATION: "update_conversation",
+  ADD_NEW_CONVERSATION: "add_new_conversation",
 };

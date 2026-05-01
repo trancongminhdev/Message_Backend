@@ -34,7 +34,6 @@ export class UserService {
     }
 
     const newUser = await this.prisma.user.create({ data: payload });
-
     return { newUser };
   }
 
