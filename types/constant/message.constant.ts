@@ -8,4 +8,5 @@ export const SUBCRIBE_MESSAGE = {
   JOIN_CONVERSATION: 'join_conversation',
   UPDATE_CONVERSATION: "update_conversation",
   ADD_NEW_CONVERSATION: "add_new_conversation",
+  SOCKET_NAVIGATION: "socket_navigation"
 };

@@ -69,7 +69,7 @@ export class MessageService {
         message: newMessage,
       };
 
-      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE, idReceiver, conversationLastMessage);
+      await this.eventEmitter.emit(EVENTS.SEND_MESSAGE, conversationLastMessage);
 
       return HTTP_RESPONSE.OK(newMessage);
     } else {

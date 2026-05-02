@@ -62,6 +62,8 @@ export class ConversationGateway
     @MessageBody() roomId: string,
     @ConnectedSocket() client: Socket,
   ) {
+    console.log('roomId', roomId);
+    
     client.join(roomId);
   }
 }
